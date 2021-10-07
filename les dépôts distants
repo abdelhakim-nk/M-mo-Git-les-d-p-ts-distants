@@ -1,0 +1,155 @@
+Cloner un dépôt distant :
+
+git clone url_du_depot_distant dossier_local
+dossier_local est facultatif mais utile si vous souhaitez spécifier le nom du dossier dans lequel le projet cloné sera récupéré.
+Par défaut il aura le même nom que sur le dépôt distant.
+L'url du dépôt distant peut être une adresse http(s)://... mais aussi git.// , ssh ou encore ftp.
+Suivant les cas des identifiants devront être fournis.
+
+Afficher les dépôts distants enregistrés :
+
+git remote
+En ajoutant l'option -v, les url distantes seront indiquées.
+
+Ajouter un dépôt distant à prendre en compte pour votre projet :
+
+git remote add nom_local_du_dépôt_distant url
+Le nom_local... saisi vous permettra ensuite de faire référence plus facilement au dépôt.
+Un dépôt cloné aura automatiquement le nom origin.
+
+Supprimer la référence à un dépôt distant :
+
+git remote rm nom_local_du_dépôt_distant
+Obtenir des informations sur un dépôt distant :
+
+git remote show nom_local_du_dépôt_distant
+Rafraîchir les données d'un dépôt distant (synchronisation) :
+
+git fetch nom_local_du_dépôt_distant
+Rafraîchir les données de tous les dépôts distants :
+
+git remote update
+Avec l'option --prune les branches disparues sur le dépôt distant sont aussi supprimées localement.
+
+Récupérer et fusionner la branche principale (master) du dépôt distant avec celle créée localement lors d'un clonage :
+
+git pull
+Pour récupérer le contenu d'une nouvelle branche distante :
+
+ - Soit fusionner avec la branche locale sur laquelle on travaille :
+
+git merge nom_local_du_dépôt_distant/nouvelle_branche
+ - Ou créer une branche locale basée sur le contenu de la branche distante :
+
+git checkout -b nouvelle_branche_locale nom_local_du_dépôt_distant/nouvelle_branche
+La nouvelle branche ainsi créée est une branche de suivi sur laquelle on peut lancer les commandes git push et git pull.
+
+Comparer une branche distante et une branche locale :
+
+git log nom_local_du_dépôt_distant/nom_branche_distante ^nom_branche_locale
+Comparer la branche actuelle avec une branche distante :
+
+git log nom_branche_distante..HEAD
+HEAD remplaçant automatiquement une borne non indiquée, la commande précédente peut être remplacée par :
+
+git log nom_branche_distante..
+Pousser vos contributions et agir sur un dépôt distant...
+Pousser votre dépôt local sur un dépôt distant :
+
+git push nom_local_du_dépôt_distant nom_branche_locale_à_pousser:nom_branche_distante
+Il est inutile de préciser le nom de la branche distante si elle a le même nom que la branche locale.
+Il faut évidemment que vous ayez le droit de pousser sur ce dépôt sans quoi vous serez rejeté.
+Vous obtiendrez aussi une erreur si une autre personne a poussé son dépôt depuis la dernière fois que vous avez récupéré les données du dépôt distant.
+
+Spécifier une branche distante ayant un nom différent lorsqu'on pousse une branche locale :
+
+git push nom_local_du_dépôt_distant branche_locale:branche_distante
+Supprimer une branche distante :
+
+git push nom_local_du_dépôt_distant :branche_distante_à_supprimer
+Renommer un dépôt distant :
+
+git remote rename ancien_nom nouveau_nom
+Pousser une étiquette sur un dépôt distant :
+
+git push nom_local_du_dépôt_distant nom_étiquette
+Pousser toutes vos étiquettes non encore présentes sur un serveur distant :
+
+git push nom_local_du_dépôt_distant --tags
+Travail collaboratif, création et application de patchs, génération d'archives
+Générer une demande de tirage (pull request) :
+
+git request-pull nom_branche_distante nom_branche_locale
+Générer un patch au format mailbox :
+
+git format-patch -M nom_branche_distante_patchée
+Envoyer tous les fichiers patch par email :
+
+git send-email [fichier|répertoire|branche]
+Appliquer un patch généré avec la commande git diff :
+
+git apply chemin_local_du_patch
+L'option --check permet de tester le patch avant de l'intégrer.
+
+Appliquer un patch généré par format-patch :
+
+git am chemin_local_du_patch
+En cas de conflit, éditer chaque fichier posant problème, les indexer puis lancer :
+
+git am --resolved
+Extraire les commits de la branche courante qui ne sont pas dans la branche A sous-forme de patchs stockés dans le répertoire courant :
+
+git for
+Création d'une archive :
+
+Au format gzip :
+
+git archive nom_branche_concernée --prefix='répertoire/' | gzip > `git describe nom_branche_concernée`.tar.gz
+Au format zip :
+
+git archive nom_branche_concernée --prefix='répertoire/' --format=zip > `git describe nom_branche_concernée`.zip
+Utilisation de sous-modules et sous-arborescences
+Ajouter un sous-module :
+
+git submodule add adresse_du_depot_distant repertoire_local_du_sous-module
+Cloner un dépôt contenant des sous-modules :
+
+Après avoir cloné le projet principal de manière ordinaire, lancer :
+
+git submodule init
+Puis :
+
+git submodule update
+Cette dernière commande est à relancer à chaque fois que le sous-module a été modifié par un autre contributeur.
+
+Si jamais un contributeur oublie de pousser le répertoire du sous-module, vous ne pourrez évidemment mettre à jour votre copie locale.
+Dans ce cas, Scott vous conseille de lui "Envoyer un mail pour lui crier dessus." :-)
+
+Alternative aux sous-modules : utiliser la fusion de sous-arborescences
+
+Commencer par récupérer le module externe comme un dépôt distant "normal" de votre projet :
+
+git remote add nom_local_du_dépôt_distant adresse_du_dépôt_distant
+git fetch nom_local_du_dépôt_distant
+Créer une branche locale suivant la branche distante :
+
+git checkout -b branche_locale_de_suivi nom_local_du_dépôt_distant/branche_suivie
+Pour tirer le sous-module dans le projet principal :
+
+git read-tree --prefix=repertoire_sous-module/ -u branche_locale_de_suivi
+Pour mettre ensuite à jour le sous-module, il faut se rendre sur sa branche :
+
+git checkout branche_locale_de_suivi
+git pull
+Pour fusionner avec la branche principale du projet :
+
+git merge -s subtree
+Pour éviter de fusionner l'historique du sous-module avec celui du projet principal :
+
+git merge --squash -s subtree --no-commit branche_locale_de_suivi
+Comparer le contenu du sous-répertoire du projet principal avec la branche locale correspondant au sous-module :
+
+git diff-tree -p branche_locale_de_suivi
+Comparer le contenu du sous-répertoire du projet principal avec la dernière version importée du sous-module :
+
+git diff-tree -p nom_local_du_dépôt_distant/branche_suivie
